@@ -1,3 +1,4 @@
+using System.Text;
 using InnoTech.LegosForLife.Core.IServices;
 using InnoTech.LegosForLife.DataAccess;
 using InnoTech.LegosForLife.DataAccess.Repositories;
@@ -5,12 +6,14 @@ using InnoTech.LegosForLife.Domain.IRepositories;
 using InnoTech.LegosForLife.Domain.Services;
 using InnoTech.LegosForLife.Security;
 using InnoTech.LegosForLife.Security.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace InnoTech.LegosForLife.WebApi
@@ -28,11 +31,55 @@ namespace InnoTech.LegosForLife.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Innotech.LegosforLife.WebApi", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Innotech.LegosforLife.WebApi", Version = "v1" });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
-            
+
+            services.AddAuthentication(authenticationOptions =>
+            {
+                authenticationOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                authenticationOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = 
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"])),
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = Configuration["Jwt:Audience"],
+                        ValidateLifetime = true
+                    };
+                });
+
             //Setting up Dependency Injection
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
@@ -85,6 +132,8 @@ namespace InnoTech.LegosForLife.WebApi
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
+            
             app.UseRouting();
 
             app.UseAuthorization();
