@@ -5,6 +5,10 @@ using InnoTech.LegosForLife.DataAccess.Repositories;
 using InnoTech.LegosForLife.Domain.IRepositories;
 using InnoTech.LegosForLife.Domain.Services;
 using InnoTech.LegosForLife.Security;
+using InnoTech.LegosForLife.Security.IRepositories;
+using InnoTech.LegosForLife.Security.IServices;
+using InnoTech.LegosForLife.Security.Models;
+using InnoTech.LegosForLife.Security.Reposities;
 using InnoTech.LegosForLife.Security.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -80,9 +84,13 @@ namespace InnoTech.LegosForLife.WebApi
                     };
                 });
 
-            //Setting up Dependency Injection
+            //Setting up Dependency Injection (DI) 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
+            
+            //Setting up DI for Security
+            services.AddScoped<IAuthUserRepository, AuthUserRepository>();
+            services.AddScoped<IAuthUserService, AuthUserService>();
             services.AddScoped<ISecurityService, SecurityService>();
 
             //Setting DB Info
@@ -90,6 +98,13 @@ namespace InnoTech.LegosForLife.WebApi
                 options =>
                 {
                     options.UseSqlite("Data Source=main.db");
+                });
+            
+            //Setup Security Context 
+            services.AddDbContext<AuthDbContext>(
+                options =>
+                {
+                    options.UseSqlite("Data Source=auth.db");
                 });
 
             services.AddCors(options =>
@@ -114,7 +129,11 @@ namespace InnoTech.LegosForLife.WebApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, MainDbContext context)
+        public void Configure(
+            IApplicationBuilder app, 
+            IWebHostEnvironment env, 
+            MainDbContext mainDbContext,
+            AuthDbContext authDbContext)
         {
             if (env.IsDevelopment())
             {
@@ -122,12 +141,13 @@ namespace InnoTech.LegosForLife.WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Innotech.LegosforLife.WebApi v1"));
                 app.UseCors("Dev-cors");
-                new DbSeeder(context).SeedDevelopment();
+                new MainDbSeeder(mainDbContext).SeedDevelopment();
+                new AuthDbSeeder(authDbContext).SeedDevelopment();
             }
             else
             {
                 app.UseCors("Prod-cors");
-                new DbSeeder(context).SeedProduction();
+                new MainDbSeeder(mainDbContext).SeedProduction();
             }
 
             app.UseHttpsRedirection();

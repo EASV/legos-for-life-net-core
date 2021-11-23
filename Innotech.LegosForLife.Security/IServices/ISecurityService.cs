@@ -1,6 +1,6 @@
 using InnoTech.LegosForLife.Security.Models;
 
-namespace InnoTech.LegosForLife.Security
+namespace InnoTech.LegosForLife.Security.IServices
 {
     public interface ISecurityService
     {

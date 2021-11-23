@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using InnoTech.LegosForLife.Core.IServices;
 using InnoTech.LegosForLife.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InnoTech.LegosForLife.WebApi.Controllers
@@ -17,6 +18,7 @@ namespace InnoTech.LegosForLife.WebApi.Controllers
             _productService = productService ?? throw new InvalidDataException("ProductService Cannot Be Null");
         }
         
+        [Authorize]
         [HttpGet]
         public ActionResult<List<Product>> GetAll()
         {
