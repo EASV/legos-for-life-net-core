@@ -133,7 +133,8 @@ namespace InnoTech.LegosForLife.WebApi
             IApplicationBuilder app, 
             IWebHostEnvironment env, 
             MainDbContext mainDbContext,
-            AuthDbContext authDbContext)
+            AuthDbContext authDbContext,
+            ISecurityService securityService)
         {
             if (env.IsDevelopment())
             {
@@ -142,7 +143,7 @@ namespace InnoTech.LegosForLife.WebApi
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Innotech.LegosforLife.WebApi v1"));
                 app.UseCors("Dev-cors");
                 new MainDbSeeder(mainDbContext).SeedDevelopment();
-                new AuthDbSeeder(authDbContext).SeedDevelopment();
+                new AuthDbSeeder(authDbContext, securityService).SeedDevelopment();
             }
             else
             {

@@ -29,7 +29,7 @@ namespace InnoTech.LegosForLife.Security.Services
         {
             var user = _authUserService.GetUser(username);
             //Validate User - Generate
-            if (user != null)
+            if (Authenticate(password, user))
             {
                 var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -49,6 +49,25 @@ namespace InnoTech.LegosForLife.Security.Services
             {
                 Message = "User or Password not correct"
             };
+        }
+
+        private bool Authenticate(string plainTextPassword, AuthUser user)
+        {
+            if (user == null || user.HashedPassword.Length <= 0 || user.Salt.Length <= 0) 
+                return false;
+
+            var hashedPasswordFromPlain = HashedPassword(plainTextPassword, user.Salt);
+            return user.HashedPassword.Equals(hashedPasswordFromPlain);
+        }
+
+        public string HashedPassword(string plainTextPassword, byte[] userSalt)
+        {
+            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: plainTextPassword,
+                salt: userSalt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8));
         }
     }
 }
