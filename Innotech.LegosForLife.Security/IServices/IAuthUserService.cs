@@ -4,6 +4,6 @@ namespace InnoTech.LegosForLife.Security.IServices
 {
     public interface IAuthUserService
     {
-        AuthUser Login(string username, string password);
+        AuthUser GetUser(string username);
     }
 }

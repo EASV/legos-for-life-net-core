@@ -18,7 +18,7 @@ namespace InnoTech.LegosForLife.Security
             
             _ctx.AuthUsers.Add(new AuthUserEntity
             {
-                Password = "123456",
+                HashedPassword = "123456",
                 Username = "ljuul"
             });
             _ctx.SaveChanges();

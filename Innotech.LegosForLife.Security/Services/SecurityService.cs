@@ -1,18 +1,20 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using InnoTech.LegosForLife.Security.IServices;
 using InnoTech.LegosForLife.Security.Models;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace InnoTech.LegosForLife.Security.Services
 {
-    public class SecurityService: ISecurityService
+    public class SecurityService : ISecurityService
     {
         private readonly IAuthUserService _authUserService;
-        
+
         public SecurityService(
             IConfiguration configuration,
             IAuthUserService authUserService)
@@ -22,10 +24,10 @@ namespace InnoTech.LegosForLife.Security.Services
         }
 
         public IConfiguration Configuration { get; }
-        
+
         public JwtToken GenerateJwtToken(string username, string password)
         {
-            var user = _authUserService.Login(username, password);
+            var user = _authUserService.GetUser(username);
             //Validate User - Generate
             if (user != null)
             {
@@ -42,6 +44,7 @@ namespace InnoTech.LegosForLife.Security.Services
                     Message = "Ok"
                 };
             }
+
             return new JwtToken
             {
                 Message = "User or Password not correct"
