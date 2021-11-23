@@ -1,10 +1,11 @@
 using System.Text;
+using InnoTech.LegosForLife.DataAccess;
 using InnoTech.LegosForLife.Security.Entities;
 using InnoTech.LegosForLife.Security.IServices;
 
 namespace InnoTech.LegosForLife.Security
 {
-    public class AuthDbSeeder
+    public class AuthDbSeeder: IAuthDbSeeder
     {
         private readonly AuthDbContext _ctx;
         private readonly ISecurityService _securityService;

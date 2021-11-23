@@ -3,11 +3,11 @@ using InnoTech.LegosForLife.DataAccess.Entities;
 
 namespace InnoTech.LegosForLife.DataAccess
 {
-    public class MainDbSeeder
+    public class MainMainDbSeeder: IMainDbSeeder
     {
         private readonly MainDbContext _ctx;
 
-        public MainDbSeeder(MainDbContext ctx)
+        public MainMainDbSeeder(MainDbContext ctx)
         {
             _ctx = ctx;
         }

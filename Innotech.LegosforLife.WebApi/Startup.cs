@@ -87,12 +87,14 @@ namespace InnoTech.LegosForLife.WebApi
             //Setting up Dependency Injection (DI) 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IMainDbSeeder, MainMainDbSeeder>();
             
             //Setting up DI for Security
             services.AddScoped<IAuthUserRepository, AuthUserRepository>();
             services.AddScoped<IAuthUserService, AuthUserService>();
             services.AddScoped<ISecurityService, SecurityService>();
-
+            services.AddScoped<IAuthDbSeeder, AuthDbSeeder>();
+            
             //Setting DB Info
             services.AddDbContext<MainDbContext>(
                 options =>
@@ -132,9 +134,8 @@ namespace InnoTech.LegosForLife.WebApi
         public void Configure(
             IApplicationBuilder app, 
             IWebHostEnvironment env, 
-            MainDbContext mainDbContext,
-            AuthDbContext authDbContext,
-            ISecurityService securityService)
+            IMainDbSeeder mainDbSeeder,
+            IAuthDbSeeder authDbSeeder)
         {
             if (env.IsDevelopment())
             {
@@ -142,13 +143,13 @@ namespace InnoTech.LegosForLife.WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Innotech.LegosforLife.WebApi v1"));
                 app.UseCors("Dev-cors");
-                new MainDbSeeder(mainDbContext).SeedDevelopment();
-                new AuthDbSeeder(authDbContext, securityService).SeedDevelopment();
+                mainDbSeeder.SeedDevelopment();
+                authDbSeeder.SeedDevelopment();
             }
             else
             {
                 app.UseCors("Prod-cors");
-                new MainDbSeeder(mainDbContext).SeedProduction();
+                mainDbSeeder.SeedProduction();
             }
 
             app.UseHttpsRedirection();

@@ -17,4 +17,8 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\InnoTech.LegosForLife.DataAccess\InnoTech.LegosForLife.DataAccess.csproj" />
+    </ItemGroup>
+
 </Project>
