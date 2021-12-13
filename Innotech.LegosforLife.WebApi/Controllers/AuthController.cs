@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using InnoTech.LegosForLife.Security;
 using InnoTech.LegosForLife.Security.IServices;
+using InnoTech.LegosForLife.Security.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,12 +27,23 @@ namespace InnoTech.LegosForLife.WebApi.Controllers
         [HttpPost(nameof(Login))]
         public ActionResult<TokenDto> Login(LoginDto dto)
         {
-            var token = _securityService.GenerateJwtToken(dto.Username, dto.Password);
-            return new TokenDto
+            try
             {
-                Jwt = token.Jwt,
-                Message = token.Message
-            };
+                var token = _securityService.GenerateJwtToken(dto.Username, dto.Password);
+                return Ok(new TokenDto
+                {
+                    Jwt = token.Jwt,
+                    Message = token.Message
+                });
+            }
+            catch (AuthenticationException ae)
+            {
+                return Unauthorized(ae.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Please contact Admin");
+            }
         }
     }
 

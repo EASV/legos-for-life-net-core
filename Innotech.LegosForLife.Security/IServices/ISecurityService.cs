@@ -6,5 +6,6 @@ namespace InnoTech.LegosForLife.Security.IServices
     {
         JwtToken GenerateJwtToken(string username, string password);
         string HashedPassword(string plainTextPassword, byte[] userSalt);
+        AuthUser GenerateNewAuthUser(string username);
     }
 }

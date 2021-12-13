@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using InnoTech.LegosForLife.Security.IServices;
@@ -45,10 +47,7 @@ namespace InnoTech.LegosForLife.Security.Services
                 };
             }
 
-            return new JwtToken
-            {
-                Message = "User or Password not correct"
-            };
+            throw new AuthenticationException("User or Password not correct");
         }
 
         private bool Authenticate(string plainTextPassword, AuthUser user)
@@ -68,6 +67,32 @@ namespace InnoTech.LegosForLife.Security.Services
                 prf: KeyDerivationPrf.HMACSHA256,
                 iterationCount: 100000,
                 numBytesRequested: 256 / 8));
+        }
+
+        public AuthUser GenerateNewAuthUser(string username)
+        {
+            //Make Default Password
+            var defaultPassword = "123456";
+            //Make new Salt
+            var salt = new byte[128 / 8];
+            using (var rngCsp = new RNGCryptoServiceProvider())
+            {
+                rngCsp.GetNonZeroBytes(salt);
+            }
+            //Generate Hashed Password
+            var hashedPassword = HashedPassword(defaultPassword, salt);
+            
+            //Create AuthUser with new Hashed Password and Salt
+            //Pass Auth to AuthUser Service
+            var authUser = _authUserService.Create(new AuthUser
+            {
+                UserName = username,
+                HashedPassword = hashedPassword,
+                Salt = salt
+            });
+
+            return authUser;
+            //When Saved Return new User
         }
     }
 }

@@ -6,5 +6,6 @@ namespace InnoTech.LegosForLife.Security.IRepositories
     {
         // AuthUser FindByUsernameAndPassword(string username, string password);
         AuthUser FindUser(string username);
+        AuthUser Save(AuthUser authUser);
     }
 }
