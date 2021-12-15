@@ -39,7 +39,7 @@ namespace InnoTech.LegosForLife.Security.Reposities
                 Id = entity.Id,
                 UserName = entity.Username,
                 HashedPassword = entity.HashedPassword,
-                Salt = Encoding.ASCII.GetBytes(entity.Salt)
+                Salt = Convert.FromBase64String(entity.Salt)
             };
         }
 
@@ -48,7 +48,7 @@ namespace InnoTech.LegosForLife.Security.Reposities
             var enitity = _ctx.Add(new AuthUserEntity
             {
                 HashedPassword = authUser.HashedPassword,
-                Salt = Encoding.ASCII.GetString(authUser.Salt),
+                Salt = Convert.ToBase64String(authUser.Salt),
                 Username = authUser.UserName
             }).Entity;
             _ctx.SaveChanges();

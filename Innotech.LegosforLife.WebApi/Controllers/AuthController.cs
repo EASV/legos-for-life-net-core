@@ -45,6 +45,37 @@ namespace InnoTech.LegosForLife.WebApi.Controllers
                 return StatusCode(500, "Please contact Admin");
             }
         }
+
+        [HttpPost]
+        public ActionResult<AuthUserDto> Create([FromBody] CreateAuthUserDto dto)
+        {
+            try
+            {
+                var authUser = _securityService.GenerateNewAuthUser(dto.Username);
+                return Ok(new AuthUserDto
+                {
+                    Id = authUser.Id,
+                    Username = authUser.UserName
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, "Contact Admin!");
+            }
+            
+        }
+    }
+
+    public class CreateAuthUserDto
+    {
+        public string Username { get; set; }
+    }
+
+    public class AuthUserDto
+    {
+        public int Id { get; set; }
+        public string Username { get; set; }
     }
 
     public class TokenDto
